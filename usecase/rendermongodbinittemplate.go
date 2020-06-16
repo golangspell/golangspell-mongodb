@@ -25,14 +25,16 @@ func addEnvironmentVariable(currentPath string) error {
 		fmt.Printf("An error occurred while trying to read the environment file. Error: %s\n", err.Error())
 		return err
 	}
+
 	code := strings.ReplaceAll(
 		string(content),
 		"type Config struct {\n",
-		"type Config struct {\n//DBConnectionString to connect to Mongo\nDBConnectionString string\n")
+		"type Config struct {\n//DBConnectionString to connect to Mongo\nDBConnectionString string\n//DBConnectionCertificateFileName defines the TLS Certificate for DB Connections. If not set, no TLS is configured\nDBConnectionCertificateFileName string\n")
 	code = strings.ReplaceAll(
 		code,
 		"func init() {\n",
-		"func init() {\n_ = viper.BindEnv(\"DBConnectionString\", \"DB_CONNECTION_STRING\")\n")
+		"func init() {\n_ = viper.BindEnv(\"DBConnectionString\", \"DB_CONNECTION_STRING\")\n_ = viper.BindEnv(\"DBConnectionCertificateFileName\", \"DB_CONNECTION_CERTIFICATE_FILE_NAME\")\n")
+
 	err = ioutil.WriteFile(filePath, []byte(code), 0644)
 	if err != nil {
 		fmt.Printf("An error occurred while trying to update the environment file. Error: %s\n", err.Error())
