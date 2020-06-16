@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-16
 
 ### Added
-- Support for encrypted connections with TTL
+- Support for encrypted connections with TLS
 - CHANGELOG.md
 
 ## [0.0.1] - 2020-05-26
