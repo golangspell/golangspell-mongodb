@@ -21,21 +21,75 @@ type MongoClient struct {
 	Conn  *mongo.Client
 }
 
-//buildMongoClient creates the MongoClient instance
-func buildMongoClient() appcontext.Component {
-	var mongoClient = MongoClient{}
-	mongoClient.DBURI = config.Values.DBConnectionString
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoClient.DBURI))
+func getCustomTLSConfig(caFile string) (*tls.Config, error) {
+	tlsConfig := new(tls.Config)
+	certs, err := ioutil.ReadFile(caFile)
+
 	if err != nil {
-		log.Fatal("An error occurred while trying to open a DB connection. DBURI: " + mongoClient.DBURI + " - error message: " + err.Error())
+		return tlsConfig, err
+	}
+
+	tlsConfig.RootCAs = x509.NewCertPool()
+	ok := tlsConfig.RootCAs.AppendCertsFromPEM(certs)
+
+	if !ok {
+		return tlsConfig, errors.New("Failed parsing pem file")
+	}
+
+	return tlsConfig, nil
+}
+
+//buildMongoClientWithTLS creates the MongoClient instance with TLS encryption
+func buildMongoClientWithTLS() appcontext.Component {
+	var mongoClient = MongoClient{}
+
+	caFilePath := config.Values.DBConnectionCertificateFileName
+
+	tlsConfig, err := getCustomTLSConfig(caFilePath)
+	if err != nil {
+		log.Fatalf("Failed getting TLS configuration: %v", err)
+	}
+
+	mongoClient.DBURI = config.Values.DBConnectionString
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoClient.DBURI).SetTLSConfig(tlsConfig))
+	if err != nil {
+		log.Fatal("An error occurred while trying to open a DB connection.  Error message: " + err.Error())
 	}
 	ctx := context.Background()
 	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatal("An error occurred while trying to open a DB connection. DBURI: " + mongoClient.DBURI + " - error message: " + err.Error())
+		log.Fatal("An error occurred while trying to open a DB connection. Error message: " + err.Error())
+	}
+
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Fatalf("Failed to ping cluster: %v", err)
 	}
 	mongoClient.Conn = client
-	return mongoClient
+	return &mongoClient
+}
+
+//buildMongoClient creates the MongoClient instance
+func buildMongoClient() appcontext.Component {
+	var mongoClient = MongoClient{}
+
+	mongoClient.DBURI = config.Values.DBConnectionString
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoClient.DBURI))
+	if err != nil {
+		log.Fatal("An error occurred while trying to open a DB connection.  Error message: " + err.Error())
+	}
+	ctx := context.Background()
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal("An error occurred while trying to open a DB connection. Error message: " + err.Error())
+	}
+
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Fatalf("Failed to ping cluster: %v", err)
+	}
+	mongoClient.Conn = client
+	return &mongoClient
 }
 
 //StartTransactionalSession starts a Database Session with an open Transaction
@@ -80,7 +134,9 @@ func init() {
 		return
 	}
 
-	appcontext.Current.Add(appcontext.DBClient, buildMongoClient)
-
-	log.Println("Connected to database ")
+	if config.Values.DBConnectionCertificateFileName == "" {
+		appcontext.Current.Add(appcontext.DBClient, buildMongoClient)
+	} else {
+		appcontext.Current.Add(appcontext.DBClient, buildMongoClientWithTLS)
+	}
 }
