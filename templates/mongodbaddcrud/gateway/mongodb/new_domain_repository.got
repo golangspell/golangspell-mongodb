@@ -1,0 +1,167 @@
+package mongodb
+
+import (
+	"context"
+	"fmt"
+	"time"
+	"strings"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"{{.ModuleName}}/appcontext"
+	"{{.ModuleName}}/config"
+	"{{.ModuleName}}/domain"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+//CollectionName in MongoDB
+const {{.DomainEntityLowerCamel}}sCollectionName = "{{.DomainEntityLower}}s"
+
+//{{.DomainEntity}}Repository is the specification of the features delivered by a Repository for a {{.DomainEntity}}
+type {{.DomainEntity}}Repository struct {
+	Conn *mongo.Client
+}
+
+//Get a {{.DomainEntity}} by ID
+func (repo *{{.DomainEntity}}Repository) Get(id string) (*domain.{{.DomainEntity}}, error) {
+	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}sCollectionName)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	{{.DomainEntityLowerCamel}}ID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, domain.ConstraintViolation(fmt.Sprintf("Invalid {{.DomainEntity}} ID format: %s . Message: %s", id, err.Error()))
+	}
+	filter := bson.M{"_id": {{.DomainEntityLowerCamel}}ID}
+	var {{.DomainEntityLowerCamel}} = domain.{{.DomainEntity}}{}
+	err = collection.FindOne(ctx, filter).Decode(&{{.DomainEntityLowerCamel}})
+	if err != nil && err.Error() == "mongo: no documents in result" {
+		return nil, domain.NotFound(fmt.Sprintf("Could not find {{.DomainEntity}} with the ID: %s . Message: %s", id, err.Error()))
+	}
+	if err != nil {
+		return nil, domain.InternalError(fmt.Sprintf("Database fetch error while Getting the {{.DomainEntity}} for ID: %s - Message: %s", id, err.Error()))
+	}
+	return &{{.DomainEntityLowerCamel}}, nil
+}
+
+//Save a new {{.DomainEntityLowerCamel}} in the collection
+func (repo *{{.DomainEntity}}Repository) Save({{.DomainEntityLowerCamel}} *domain.{{.DomainEntity}}) (*domain.{{.DomainEntity}}, error) {
+	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}sCollectionName)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	logger := config.GetLogger
+	defer logger().Sync()
+
+	logger().Debugf("\n\n\n Before saving to respository %+v \n", {{.DomainEntityLowerCamel}})
+
+	if primitive.NilObjectID != {{.DomainEntityLowerCamel}}.ID {
+		return nil, domain.InternalError("The Save method should not be used for updating. Please use Update instead")
+	}
+	{{.DomainEntityLowerCamel}}.ID = primitive.NewObjectID()
+	{{.DomainEntityLowerCamel}}.DateCreated = time.Now()
+
+	_, err := collection.InsertOne(ctx, {{.DomainEntityLowerCamel}})
+	if err != nil {
+		return nil, domain.InternalError(fmt.Sprintf("Could not create the {{.DomainEntityLowerCamel}}. {{.DomainEntityLowerCamel}}: %+v - Message: %s", {{.DomainEntityLowerCamel}}, err.Error()))
+	}
+	return {{.DomainEntityLowerCamel}}, nil
+
+}
+
+//Update a {{.DomainEntityLowerCamel}} in the collection
+func (repo *{{.DomainEntity}}Repository) Update({{.DomainEntityLowerCamel}} *domain.{{.DomainEntity}}) (*domain.{{.DomainEntity}}, error) {
+	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}sCollectionName)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": {{.DomainEntityLowerCamel}}.ID}
+	existentCount, err := collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return nil, domain.ApplicationError(fmt.Sprintf("Could not count the {{.DomainEntityLowerCamel}}s with ID = %s - Message: %s", {{.DomainEntityLowerCamel}}.ID.Hex(), err.Error()))
+	}
+	if existentCount == 0 {
+		msg := fmt.Sprintf("The {{.DomainEntityLowerCamel}} %s was not found", {{.DomainEntityLowerCamel}}.ID.Hex())
+		return nil, domain.NotFound(msg)
+	}
+
+	{{.DomainEntityLowerCamel}}.DateUpdated = time.Now()
+	_, err = collection.ReplaceOne(ctx, filter, {{.DomainEntityLowerCamel}})
+	if err != nil {
+		return nil, domain.ApplicationError(fmt.Sprintf("Could not update the {{.DomainEntityLowerCamel}} with ID = %s - Message: %s", {{.DomainEntityLowerCamel}}.ID.Hex(), err.Error()))
+	}
+	return {{.DomainEntityLowerCamel}}, nil
+
+}
+
+//GetAll {{.DomainEntity}}
+func (repo *{{.DomainEntity}}Repository) GetAll(last{{.DomainEntity}}ID string, pageSize int64) ([]*domain.{{.DomainEntity}}, error) {
+	{{.DomainEntityLowerCamel}}s := make([]*domain.{{.DomainEntity}}, 0)
+	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}sCollectionName)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	var dbfilter interface{}
+	if strings.TrimSpace(last{{.DomainEntity}}ID) == "" {
+		dbfilter = bson.D{}
+	} else {
+		last{{.DomainEntity}}, err := primitive.ObjectIDFromHex(last{{.DomainEntity}}ID)
+		if err != nil {
+			return nil, domain.ConstraintViolation(fmt.Sprintf("Invalid {{.DomainEntityLowerCamel}} Id: %s. Message: %s", last{{.DomainEntity}}ID, err.Error()))
+		}
+		dbfilter = bson.M{"_id": bson.M{"$lt": last{{.DomainEntity}}}}
+	}
+	opts := &options.FindOptions{}
+	opts.SetSort(bson.M{"_id": 1})
+	opts.SetLimit(pageSize)
+	cur, err := collection.Find(ctx, dbfilter, opts)
+	defer func() { _ = cur.Close(ctx) }()
+	if err != nil {
+		return nil, domain.InternalError(fmt.Sprintf("An error occurred while trying to find the {{.DomainEntityLowerCamel}}s. SsmId: %s - Filters: %+v. Message: %s", ssmID, filter, err.Error()))
+	}
+	for cur.Next(ctx) {
+		var result domain.{{.DomainEntity}}
+		err := cur.Decode(&result)
+		if err != nil {
+			return nil, domain.InternalError(fmt.Sprintf("An error occured while trying to convert the {{.DomainEntity}} from the database. Message: %s", err.Error()))
+		}
+		{{.DomainEntityLowerCamel}}s = append({{.DomainEntityLowerCamel}}s, &result)
+	}
+	if err := cur.Err(); err != nil {
+		return nil, domain.InternalError(fmt.Sprintf("An error occured while trying to convert the list of {{.DomainEntity}}s from the database. Message: %s", err.Error()))
+	}
+	return {{.DomainEntityLowerCamel}}s, nil
+}
+
+//Delete a {{.DomainEntity}}Repository by ID
+func (repo *{{.DomainEntity}}Repository) Delete(id string) error {
+	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}sCollectionName)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	{{.DomainEntityLowerCamel}}ID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return domain.ConstraintViolation(fmt.Sprintf("Invalid {{.DomainEntity}} ID format: %s . Message: %s", id, err.Error()))
+	}
+	filter := bson.M{"_id": {{.DomainEntityLowerCamel}}ID}
+	result, err := collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return domain.InternalError(fmt.Sprintf("Database error while deleting the {{.DomainEntity}} with ID: %s - Message: %s", id, err.Error()))
+	}
+	if result.DeletedCount != 1 {
+		return domain.NotFound(fmt.Sprintf("Could not find {{.DomainEntity}} with the ID: %s . Message: %s", id, err.Error()))
+	}
+	return nil
+}
+
+func build{{.DomainEntity}}Repository() appcontext.Component {
+	dbClient := appcontext.Current.Get(appcontext.DBClient).(MongoClient)
+	return &{{.DomainEntity}}Repository{Conn: dbClient.Conn}
+}
+
+func init() {
+	if config.Values.TestRun {
+		return
+	}
+
+	appcontext.Current.Add(appcontext.{{.DomainEntity}}Repository, build{{.DomainEntity}}Repository)
+}

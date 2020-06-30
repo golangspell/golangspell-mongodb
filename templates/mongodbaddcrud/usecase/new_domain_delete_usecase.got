@@ -1,0 +1,43 @@
+package usecase
+
+import (
+	"fmt"
+
+	"{{.ModuleName}}/appcontext"
+	"{{.ModuleName}}/config"
+	"{{.ModuleName}}/domain"
+)
+
+//{{.DomainEntity}}Delete represents the Usecase which orchestrates the {{.DomainEntity}} deletion from the database
+type {{.DomainEntity}}Delete struct {
+	{{.DomainEntityLowerCamel}}Repository domain.{{.DomainEntity}}Repository
+}
+
+//Execute deletes the {{.DomainEntity}} with the provided ID
+func (u *{{.DomainEntity}}Delete) Execute(ID string) error {
+	logger := config.GetLogger
+	defer logger().Sync()
+
+	{{.DomainEntityLowerCamel}}Repository := u.{{.DomainEntityLowerCamel}}Repository
+	err := {{.DomainEntityLowerCamel}}Repository.Delete(ID)
+	if err != nil {
+		msg := fmt.Sprintf("Could not delete the {{.DomainEntity}} with ID: %s. Message: %s\n", ID, err.Error())
+		logger().Error(msg)
+		return err
+	}
+	return nil
+}
+
+func build{{.DomainEntity}}DeleteUsecase() appcontext.Component {
+
+	return &{{.DomainEntity}}Delete{
+		{{.DomainEntityLowerCamel}}Repository: domain.Get{{.DomainEntity}}Repository(),
+	}
+}
+
+func init() {
+	if config.Values.TestRun {
+		return
+	}
+	appcontext.Current.Add(appcontext.{{.DomainEntity}}DeleteUsecase, build{{.DomainEntity}}DeleteUsecase)
+}

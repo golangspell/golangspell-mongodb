@@ -1,0 +1,132 @@
+package controller
+
+import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
+
+	"github.com/labstack/echo/v4"
+	"{{.ModuleName}}/config"
+	"{{.ModuleName}}/domain"
+)
+
+const (
+	Default{{.DomainEntity}}PageSize = 20
+)
+
+//Create{{.DomainEntity}} creates a new {{.DomainEntity}}
+func Create{{.DomainEntity}}(c echo.Context) error {
+	logger := config.GetLogger
+	defer logger().Sync()
+
+	{{.DomainEntityLowerCamel}} := domain.{{.DomainEntity}}{}
+	if err := c.Bind(&{{.DomainEntityLowerCamel}}); err != nil {
+		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("An error occurred while trying to read the request body: "+err.Error()))
+	}
+
+	{{.DomainEntityLowerCamel}}, err := domain.Get{{.DomainEntity}}CreateUsecase().Execute({{.DomainEntityLowerCamel}})
+
+	if err != nil {
+		logger().Errorf("An error occurred while trying to Create the {{.DomainEntity}}: %s", err.Error())
+		return c.JSON(err.(domain.GenericError).Code, err)
+	}
+
+	return c.JSON(http.StatusCreated, {{.DomainEntityLowerCamel}})
+}
+
+//GetAll{{.DomainEntity}}s of the collection
+func GetAll{{.DomainEntity}}s(c echo.Context) error {
+	logger := config.GetLogger
+	defer logger().Sync()
+	var last{{.DomainEntity}}ID = c.QueryParam("last{{.DomainEntity}}Id")
+	var pageSizeString = c.QueryParam("pageSize")
+
+	var pageSize int
+	if pageSizeString == "" {
+		pageSize = Default{{.DomainEntity}}PageSize
+	} else {
+		var err error
+		pageSize, err = strconv.Atoi(pageSizeString)
+		if err != nil {
+			msg := fmt.Sprintf("Invalid format for pageSize %s. Message: %s", pageSizeString, err.Error())
+			logger().Error(msg)
+			return c.JSON(http.StatusBadRequest, domain.ConstraintViolation(msg))
+		}
+	}
+
+	{{.DomainEntityLowerCamel}}s, err := domain.Get{{.DomainEntity}}GetAllUsecase().Execute(last{{.DomainEntity}}ID, pageSize)
+	if err != nil {
+		logger().Errorf("An error occurred while trying to Get the {{.DomainEntity}}s: %s", err.Error())
+		return c.JSON(err.(domain.GenericError).Code, err)
+	}
+
+	return c.JSON(http.StatusOK, {{.DomainEntityLowerCamel}}s)
+}
+
+//Get{{.DomainEntity}} provided the {{.DomainEntityLowerCamel}}Id
+func Get{{.DomainEntity}}(c echo.Context) error {
+	logger := config.GetLogger
+	defer logger().Sync()
+	{{.DomainEntityLowerCamel}}ID := strings.TrimSpace(c.Param("{{.DomainEntityLowerCamel}}Id"))
+
+	if {{.DomainEntityLowerCamel}}ID == "" {
+		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("Bad request. Missing mandatory request value {{.DomainEntityLowerCamel}}Id"))
+	}
+
+	{{.DomainEntityLowerCamel}}, err := domain.Get{{.DomainEntity}}GetByIDUsecase().Execute({{.DomainEntityLowerCamel}}ID)
+	if err != nil {
+		logger().Errorf("An error occurred while trying to Get the {{.DomainEntity}}: %s", err.Error())
+		return c.JSON(err.(domain.GenericError).Code, err)
+	}
+
+	return c.JSON(http.StatusOK, {{.DomainEntityLowerCamel}})
+}
+
+//Update{{.DomainEntity}} updates the {{.DomainEntity}}
+func Update{{.DomainEntity}}(c echo.Context) error {
+	logger := config.GetLogger
+	defer logger().Sync()
+	{{.DomainEntityLowerCamel}}ID := strings.TrimSpace(c.Param("{{.DomainEntityLowerCamel}}Id"))
+	if {{.DomainEntityLowerCamel}}ID == "" {
+		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("Bad request. Missing mandatory request value {{.DomainEntityLowerCamel}}Id"))
+	}
+
+	{{.DomainEntityLowerCamel}} := domain.{{.DomainEntity}}{}
+	if err := c.Bind(&{{.DomainEntityLowerCamel}}); err != nil {
+		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("An error occurred while trying to read the request body: "+err.Error()))
+	}
+
+	if {{.DomainEntityLowerCamel}}ID != {{.DomainEntityLowerCamel}}.ID.Hex() {
+		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("The content of the URL Path Parameter {{.DomainEntityLowerCamel}}ID is different of the Body's {{.DomainEntityLowerCamel}}.ID"))
+	}
+
+	err = domain.Get{{.DomainEntity}}UpdateUsecase().Execute({{.DomainEntityLowerCamel}})
+	if err != nil {
+		logger().Errorf("An error occurred while trying to Update the {{.DomainEntity}}: %s", err.Error())
+		return c.JSON(err.(domain.GenericError).Code, err)
+	}
+
+	return c.JSON(http.StatusOK, "")
+
+}
+
+//Delete{{.DomainEntity}} provided the {{.DomainEntityLowerCamel}}Id
+func Delete{{.DomainEntity}}(c echo.Context) error {
+	logger := config.GetLogger
+	defer logger().Sync()
+	{{.DomainEntityLowerCamel}}ID := strings.TrimSpace(c.Param("{{.DomainEntityLowerCamel}}Id"))
+
+	if {{.DomainEntityLowerCamel}}ID == "" {
+		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("Bad request. Missing mandatory request value {{.DomainEntityLowerCamel}}Id"))
+	}
+
+	err := domain.Get{{.DomainEntity}}DeleteUsecase().Execute({{.DomainEntityLowerCamel}}ID)
+	if err != nil {
+		logger().Errorf("An error occurred while trying to Delete the {{.DomainEntity}}: %s", err.Error())
+		return c.JSON(err.(domain.GenericError).Code, err)
+	}
+
+	return c.JSON(http.StatusOK, "")
+}

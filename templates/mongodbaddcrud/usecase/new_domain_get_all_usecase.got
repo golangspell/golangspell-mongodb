@@ -1,0 +1,40 @@
+package usecase
+
+import (
+	"fmt"
+	"{{.ModuleName}}/appcontext"
+	"{{.ModuleName}}/config"
+	"{{.ModuleName}}/domain"
+)
+
+//{{.DomainEntity}}GetAll represents the Usecase which orchestrates the {{.DomainEntity}} creation in the database
+type {{.DomainEntity}}GetAll struct {
+	{{.DomainEntityLowerCamel}}Repository domain.{{.DomainEntity}}Repository
+}
+
+//Execute with paging
+func (u *{{.DomainEntity}}GetAll) Execute(last{{.DomainEntity}}ID string, pageSize int64) ([]*domain.{{.DomainEntity}}, error) {
+	logger := config.GetLogger
+	defer logger().Sync()
+
+	{{.DomainEntityLowerCamel}}s, err := u.{{.DomainEntityLowerCamel}}Repository.GetAll(last{{.DomainEntity}}ID, pageSize)
+	if err != nil {
+		msg := fmt.Sprintf("Could not get the {{.DomainEntity}}s. Message: %s\n", err.Error())
+		logger().Error(msg)
+		return nil, err
+	}
+	return {{.DomainEntityLowerCamel}}s, nil
+}
+
+func build{{.DomainEntity}}GetAllUsecase() appcontext.Component {
+	return &{{.DomainEntity}}GetAll{
+		{{.DomainEntityLowerCamel}}Repository: domain.Get{{.DomainEntity}}Repository(),
+	}
+}
+
+func init() {
+	if config.Values.TestRun {
+		return
+	}
+	appcontext.Current.Add(appcontext.{{.DomainEntity}}GetAllUsecase, build{{.DomainEntity}}GetAllUsecase)
+}

@@ -1,0 +1,43 @@
+package usecase
+
+import (
+	"fmt"
+
+	"{{.ModuleName}}/appcontext"
+	"{{.ModuleName}}/config"
+	"{{.ModuleName}}/domain"
+)
+
+//{{.DomainEntity}}GetByID represents the Usecase which orchestrates the {{.DomainEntity}} get from the database
+type {{.DomainEntity}}GetByID struct {
+	{{.DomainEntityLowerCamel}}Repository domain.{{.DomainEntity}}Repository
+}
+
+//Execute get the {{.DomainEntity}} with the provided ID
+func (u *{{.DomainEntity}}GetByID) Execute(ID string) (*domain.{{.DomainEntity}}, error) {
+	logger := config.GetLogger
+	defer logger().Sync()
+
+	{{.DomainEntityLowerCamel}}Repository := u.{{.DomainEntityLowerCamel}}Repository
+	{{.DomainEntityLowerCamel}}, err := {{.DomainEntityLowerCamel}}Repository.Get(ID)
+	if err != nil {
+		msg := fmt.Sprintf("Could not get the {{.DomainEntity}}. Message: %s\n", err.Error())
+		logger().Error(msg)
+		return nil, err
+	}
+	return {{.DomainEntityLowerCamel}}, nil
+}
+
+func build{{.DomainEntity}}GetByIDUsecase() appcontext.Component {
+
+	return &{{.DomainEntity}}GetByID{
+		{{.DomainEntityLowerCamel}}Repository: domain.Get{{.DomainEntity}}Repository(),
+	}
+}
+
+func init() {
+	if config.Values.TestRun {
+		return
+	}
+	appcontext.Current.Add(appcontext.{{.DomainEntity}}GetByIDUsecase, build{{.DomainEntity}}GetByIDUsecase)
+}

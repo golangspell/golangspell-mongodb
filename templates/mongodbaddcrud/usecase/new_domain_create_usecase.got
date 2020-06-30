@@ -1,0 +1,39 @@
+package usecase
+
+import (
+	"{{.ModuleName}}/appcontext"
+	"{{.ModuleName}}/config"
+	"{{.ModuleName}}/domain"
+)
+
+//{{.DomainEntity}}Create represents the Usecase which orchestrates the {{.DomainEntity}} creation in the database
+type {{.DomainEntity}}Create struct {
+	{{.DomainEntityLowerCamel}}Repository domain.{{.DomainEntity}}Repository
+}
+
+//Execute creates/persists the {{.DomainEntityLowerCamel}}
+func (u *{{.DomainEntity}}Create) Execute({{.DomainEntityLowerCamel}} *domain.{{.DomainEntity}}) (*domain.{{.DomainEntity}}, error) {
+	logger := config.GetLogger
+	defer logger().Sync()
+	logger().Debugf("{{.DomainEntity}} %+v \n", {{.DomainEntityLowerCamel}})
+
+	{{.DomainEntityLowerCamel}}, err = u.{{.DomainEntityLowerCamel}}Repository.Save({{.DomainEntityLowerCamel}})
+	if err != nil {
+		logger().Errorf("Could not save {{.DomainEntityLowerCamel}} into repository. Error %s", err.Error())
+		return nil, err
+	}
+	return {{.DomainEntityLowerCamel}}, nil
+}
+
+func build{{.DomainEntity}}CreateUsecase() appcontext.Component {
+	return &{{.DomainEntity}}Create{
+		{{.DomainEntityLowerCamel}}Repository: domain.Get{{.DomainEntity}}Repository(),
+	}
+}
+
+func init() {
+	if config.Values.TestRun {
+		return
+	}
+	appcontext.Current.Add(appcontext.{{.DomainEntity}}CreateUsecase, build{{.DomainEntity}}CreateUsecase)
+}

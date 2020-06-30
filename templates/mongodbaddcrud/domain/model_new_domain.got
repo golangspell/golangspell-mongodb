@@ -1,0 +1,83 @@
+/*
+ * {{.DomainEntity}}
+ *
+ * This is the representation of the domain entity {{.DomainEntity}}
+ *
+ */
+ package domain
+
+ import (
+	 "time"
+ 
+	 "go.mongodb.org/mongo-driver/bson/primitive"
+	 "{{.ModuleName}}/appcontext"
+ )
+ 
+ //{{.DomainEntity}} represents the domain entity
+ type {{.DomainEntity}} struct {
+	 ID primitive.ObjectID `bson:"_id" json:"id,omitempty"`
+ 
+	 DateCreated time.Time `bson:"dateCreated,omitempty" json:"dateCreated,omitempty"`
+ 
+	 DateUpdated time.Time `bson:"dateUpdated,omitempty" json:"dateUpdated,omitempty"`
+ }
+ 
+ //{{.DomainEntity}}Repository is the specification of the features delivered by a Repository for a {{.DomainEntity}}
+ type {{.DomainEntity}}Repository interface {
+	 appcontext.Component
+	 GetAll(last{{.DomainEntity}}ID string, pageSize int64) ([]*{{.DomainEntity}}, error)
+	 Get(id string) (*{{.DomainEntity}}, error)
+	 Save({{.DomainEntityLowerCamel}} *{{.DomainEntity}}) (*{{.DomainEntity}}, error)
+	 Update({{.DomainEntityLowerCamel}} *{{.DomainEntity}}) (*{{.DomainEntity}}, error)
+	 Delete(id string) error
+ }
+
+type {{.DomainEntity}}CreateUsecase interface {
+	Execute({{.DomainEntityLowerCamel}} *{{.DomainEntity}}) (*{{.DomainEntity}}, error)
+}
+
+type {{.DomainEntity}}GetAllUsecase interface {
+	Execute(last{{.DomainEntity}}ID string, pageSize int64) ([]*{{.DomainEntity}}, error)
+}
+
+type {{.DomainEntity}}GetByIDUsecase interface {
+	Execute(ID string) (*{{.DomainEntity}}, error) 
+}
+ 
+type {{.DomainEntity}}UpdateUsecase interface {
+	Execute({{.DomainEntityLowerCamel}} *{{.DomainEntity}}) error 
+}
+ 
+type {{.DomainEntity}}DeleteUsecase interface {
+	Execute(ID string) error 
+}
+ 
+ //Get{{.DomainEntity}}Repository gets the {{.DomainEntity}}Repository current implementation
+ func Get{{.DomainEntity}}Repository() {{.DomainEntity}}Repository {
+	 return appcontext.Current.Get(appcontext.{{.DomainEntity}}Repository).({{.DomainEntity}}Repository)
+ }
+ 
+ //Get{{.DomainEntity}}CreateUsecase gets the {{.DomainEntity}}CreateUsecase current implementation
+ func Get{{.DomainEntity}}CreateUsecase() {{.DomainEntity}}CreateUsecase {
+	return appcontext.Current.Get(appcontext.{{.DomainEntity}}CreateUsecase).({{.DomainEntity}}CreateUsecase)
+ }
+
+ //Get{{.DomainEntity}}GetAllUsecase gets the {{.DomainEntity}}GetAllUsecase current implementation
+ func Get{{.DomainEntity}}GetAllUsecase() {{.DomainEntity}}GetAllUsecase {
+	return appcontext.Current.Get(appcontext.{{.DomainEntity}}GetAllUsecase).({{.DomainEntity}}GetAllUsecase)
+ }
+
+ //Get{{.DomainEntity}}GetByIDUsecase gets the {{.DomainEntity}}GetByIDUsecase current implementation
+ func Get{{.DomainEntity}}GetByIDUsecase() {{.DomainEntity}}GetByIDUsecase {
+	return appcontext.Current.Get(appcontext.{{.DomainEntity}}GetByIDUsecase).({{.DomainEntity}}GetByIDUsecase)
+ }
+
+ //Get{{.DomainEntity}}UpdateUsecase gets the {{.DomainEntity}}UpdateUsecase current implementation
+ func Get{{.DomainEntity}}UpdateUsecase() {{.DomainEntity}}UpdateUsecase {
+	return appcontext.Current.Get(appcontext.{{.DomainEntity}}UpdateUsecase).({{.DomainEntity}}UpdateUsecase)
+ }
+
+ //Get{{.DomainEntity}}DeleteUsecase gets the {{.DomainEntity}}DeleteUsecase current implementation
+ func Get{{.DomainEntity}}DeleteUsecase() {{.DomainEntity}}DeleteUsecase {
+	return appcontext.Current.Get(appcontext.{{.DomainEntity}}DeleteUsecase).({{.DomainEntity}}DeleteUsecase)
+ }
