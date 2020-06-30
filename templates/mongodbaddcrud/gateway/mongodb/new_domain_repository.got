@@ -109,7 +109,7 @@ func (repo *{{.DomainEntity}}Repository) GetAll(last{{.DomainEntity}}ID string, 
 		if err != nil {
 			return nil, domain.ConstraintViolation(fmt.Sprintf("Invalid {{.DomainEntityLowerCamel}} Id: %s. Message: %s", last{{.DomainEntity}}ID, err.Error()))
 		}
-		dbfilter = bson.M{"_id": bson.M{"$lt": last{{.DomainEntity}}}}
+		dbfilter = bson.M{"_id": bson.M{"$gt": last{{.DomainEntity}}}}
 	}
 	opts := &options.FindOptions{}
 	opts.SetSort(bson.M{"_id": 1})
@@ -148,13 +148,13 @@ func (repo *{{.DomainEntity}}Repository) Delete(id string) error {
 		return domain.InternalError(fmt.Sprintf("Database error while deleting the {{.DomainEntity}} with ID: %s - Message: %s", id, err.Error()))
 	}
 	if result.DeletedCount != 1 {
-		return domain.NotFound(fmt.Sprintf("Could not find {{.DomainEntity}} with the ID: %s . Message: %s", id, err.Error()))
+		return domain.NotFound(fmt.Sprintf("Could not find {{.DomainEntity}} with the ID: %s", id))
 	}
 	return nil
 }
 
 func build{{.DomainEntity}}Repository() appcontext.Component {
-	dbClient := appcontext.Current.Get(appcontext.DBClient).(MongoClient)
+	dbClient := appcontext.Current.Get(appcontext.DBClient).(*MongoClient)
 	return &{{.DomainEntity}}Repository{Conn: dbClient.Conn}
 }
 
