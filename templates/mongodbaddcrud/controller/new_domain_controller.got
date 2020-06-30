@@ -98,7 +98,7 @@ func Update{{.DomainEntity}}(c echo.Context) error {
 	}
 
 	if {{.DomainEntityLowerCamel}}ID != {{.DomainEntityLowerCamel}}.ID.Hex() {
-		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("The content of the URL Path Parameter {{.DomainEntityLowerCamel}}Id is different of the Body's {{.DomainEntityLowerCamel}}.ID"))
+		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("The content of the URL Path Parameter {{.DomainEntityLowerCamel}}Id is different of the Body's id"))
 	}
 
 	err := domain.Get{{.DomainEntity}}UpdateUsecase().Execute(&{{.DomainEntityLowerCamel}})

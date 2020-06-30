@@ -77,15 +77,12 @@ func (repo *{{.DomainEntity}}Repository) Update({{.DomainEntityLowerCamel}} *dom
 	defer cancel()
 
 	filter := bson.M{"_id": {{.DomainEntityLowerCamel}}.ID}
-	existentCount, err := collection.CountDocuments(ctx, filter)
+	existent{{.DomainEntity}}, err := repo.Get({{.DomainEntityLowerCamel}}.ID.Hex())
 	if err != nil {
-		return nil, domain.InternalError(fmt.Sprintf("Could not count the quantity of {{.DomainEntityLowerCamel}} with ID = %s - Message: %s", {{.DomainEntityLowerCamel}}.ID.Hex(), err.Error()))
-	}
-	if existentCount == 0 {
-		msg := fmt.Sprintf("The {{.DomainEntityLowerCamel}} %s was not found", {{.DomainEntityLowerCamel}}.ID.Hex())
-		return nil, domain.NotFound(msg)
+		return nil, err
 	}
 
+	{{.DomainEntityLowerCamel}}.DateCreated = existent{{.DomainEntity}}.DateCreated
 	{{.DomainEntityLowerCamel}}.DateUpdated = time.Now()
 	_, err = collection.ReplaceOne(ctx, filter, {{.DomainEntityLowerCamel}})
 	if err != nil {
