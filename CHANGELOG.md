@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2020-06-30
+
+### Changed
+- Fixed DB Client imports
+- Adjusted routes
+- Controller imports adjusted
+- Collection name improved
+
 ## [0.1.1] - 2020-06-23
 
 ### Changed

@@ -122,7 +122,7 @@ func addNewRoutes(currentPath string, domainEntity string) error {
 	code := strings.ReplaceAll(
 		string(content),
 		"g.GET(\"/info\", GetInfo)\n",
-		fmt.Sprintf("g.GET(\"/info\", GetInfo)\ng.GET(\"/%s\", Get%sList)\ng.POST(\"/%s\", Create%s)\ng.GET(\"/%s/%sId\", Get%s)\ng.PUT(\"/%s/%sId\", Update%s)\ng.DELETE(\"/%s/%sId\", Delete%s)\n",
+		fmt.Sprintf("g.GET(\"/info\", GetInfo)\ng.GET(\"/%s\", Get%sList)\ng.POST(\"/%s\", Create%s)\ng.GET(\"/%s/:%sId\", Get%s)\ng.PUT(\"/%s/:%sId\", Update%s)\ng.DELETE(\"/%s/:%sId\", Delete%s)\n",
 			strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity),
 			strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity),
 			strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity),

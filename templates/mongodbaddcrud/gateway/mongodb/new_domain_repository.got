@@ -17,7 +17,7 @@ import (
 )
 
 //CollectionName in MongoDB
-const {{.DomainEntityLowerCamel}}sCollectionName = "{{.DomainEntityLower}}s"
+const {{.DomainEntityLowerCamel}}CollectionName = "{{.DomainEntityLower}}"
 
 //{{.DomainEntity}}Repository is the specification of the features delivered by a Repository for a {{.DomainEntity}}
 type {{.DomainEntity}}Repository struct {
@@ -26,7 +26,7 @@ type {{.DomainEntity}}Repository struct {
 
 //Get a {{.DomainEntity}} by ID
 func (repo *{{.DomainEntity}}Repository) Get(id string) (*domain.{{.DomainEntity}}, error) {
-	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}sCollectionName)
+	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}CollectionName)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	{{.DomainEntityLowerCamel}}ID, err := primitive.ObjectIDFromHex(id)
@@ -47,7 +47,7 @@ func (repo *{{.DomainEntity}}Repository) Get(id string) (*domain.{{.DomainEntity
 
 //Save a new {{.DomainEntityLowerCamel}} in the collection
 func (repo *{{.DomainEntity}}Repository) Save({{.DomainEntityLowerCamel}} *domain.{{.DomainEntity}}) (*domain.{{.DomainEntity}}, error) {
-	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}sCollectionName)
+	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}CollectionName)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -72,7 +72,7 @@ func (repo *{{.DomainEntity}}Repository) Save({{.DomainEntityLowerCamel}} *domai
 
 //Update a {{.DomainEntityLowerCamel}} in the collection
 func (repo *{{.DomainEntity}}Repository) Update({{.DomainEntityLowerCamel}} *domain.{{.DomainEntity}}) (*domain.{{.DomainEntity}}, error) {
-	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}sCollectionName)
+	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}CollectionName)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -98,7 +98,7 @@ func (repo *{{.DomainEntity}}Repository) Update({{.DomainEntityLowerCamel}} *dom
 //GetAll {{.DomainEntity}}
 func (repo *{{.DomainEntity}}Repository) GetAll(last{{.DomainEntity}}ID string, pageSize int64) ([]*domain.{{.DomainEntity}}, error) {
 	{{.DomainEntityLowerCamel}}s := make([]*domain.{{.DomainEntity}}, 0)
-	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}sCollectionName)
+	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}CollectionName)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	var dbfilter interface{}
@@ -135,7 +135,7 @@ func (repo *{{.DomainEntity}}Repository) GetAll(last{{.DomainEntity}}ID string, 
 
 //Delete a {{.DomainEntity}}Repository by ID
 func (repo *{{.DomainEntity}}Repository) Delete(id string) error {
-	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}sCollectionName)
+	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}CollectionName)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	{{.DomainEntityLowerCamel}}ID, err := primitive.ObjectIDFromHex(id)
