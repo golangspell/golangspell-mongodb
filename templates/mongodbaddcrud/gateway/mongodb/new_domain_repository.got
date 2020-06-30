@@ -79,7 +79,7 @@ func (repo *{{.DomainEntity}}Repository) Update({{.DomainEntityLowerCamel}} *dom
 	filter := bson.M{"_id": {{.DomainEntityLowerCamel}}.ID}
 	existentCount, err := collection.CountDocuments(ctx, filter)
 	if err != nil {
-		return nil, domain.InternalError(fmt.Sprintf("Could not count the {{.DomainEntityLowerCamel}}s with ID = %s - Message: %s", {{.DomainEntityLowerCamel}}.ID.Hex(), err.Error()))
+		return nil, domain.InternalError(fmt.Sprintf("Could not count the quantity of {{.DomainEntityLowerCamel}} with ID = %s - Message: %s", {{.DomainEntityLowerCamel}}.ID.Hex(), err.Error()))
 	}
 	if existentCount == 0 {
 		msg := fmt.Sprintf("The {{.DomainEntityLowerCamel}} %s was not found", {{.DomainEntityLowerCamel}}.ID.Hex())
@@ -97,7 +97,7 @@ func (repo *{{.DomainEntity}}Repository) Update({{.DomainEntityLowerCamel}} *dom
 
 //GetAll {{.DomainEntity}}
 func (repo *{{.DomainEntity}}Repository) GetAll(last{{.DomainEntity}}ID string, pageSize int64) ([]*domain.{{.DomainEntity}}, error) {
-	{{.DomainEntityLowerCamel}}s := make([]*domain.{{.DomainEntity}}, 0)
+	{{.DomainEntityLowerCamel}}List := make([]*domain.{{.DomainEntity}}, 0)
 	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}CollectionName)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -125,12 +125,12 @@ func (repo *{{.DomainEntity}}Repository) GetAll(last{{.DomainEntity}}ID string, 
 		if err != nil {
 			return nil, domain.InternalError(fmt.Sprintf("An error occured while trying to convert the {{.DomainEntity}} from the database. Message: %s", err.Error()))
 		}
-		{{.DomainEntityLowerCamel}}s = append({{.DomainEntityLowerCamel}}s, &result)
+		{{.DomainEntityLowerCamel}}List = append({{.DomainEntityLowerCamel}}List, &result)
 	}
 	if err := cur.Err(); err != nil {
 		return nil, domain.InternalError(fmt.Sprintf("An error occured while trying to convert the list of {{.DomainEntity}} from the database. Message: %s", err.Error()))
 	}
-	return {{.DomainEntityLowerCamel}}s, nil
+	return {{.DomainEntityLowerCamel}}List, nil
 }
 
 //Delete a {{.DomainEntity}}Repository by ID

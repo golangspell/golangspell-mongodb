@@ -17,13 +17,13 @@ func (u *{{.DomainEntity}}GetAll) Execute(last{{.DomainEntity}}ID string, pageSi
 	logger := config.GetLogger
 	defer logger().Sync()
 
-	{{.DomainEntityLowerCamel}}s, err := u.{{.DomainEntityLowerCamel}}Repository.GetAll(last{{.DomainEntity}}ID, pageSize)
+	{{.DomainEntityLowerCamel}}List, err := u.{{.DomainEntityLowerCamel}}Repository.GetAll(last{{.DomainEntity}}ID, pageSize)
 	if err != nil {
 		msg := fmt.Sprintf("Could not get the {{.DomainEntity}} list. Message: %s\n", err.Error())
 		logger().Error(msg)
 		return nil, err
 	}
-	return {{.DomainEntityLowerCamel}}s, nil
+	return {{.DomainEntityLowerCamel}}List, nil
 }
 
 func build{{.DomainEntity}}GetAllUsecase() appcontext.Component {

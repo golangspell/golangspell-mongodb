@@ -55,13 +55,13 @@ func Get{{.DomainEntity}}List(c echo.Context) error {
 		}
 	}
 
-	{{.DomainEntityLowerCamel}}s, err := domain.Get{{.DomainEntity}}GetAllUsecase().Execute(last{{.DomainEntity}}ID, int64(pageSize))
+	{{.DomainEntityLowerCamel}}List, err := domain.Get{{.DomainEntity}}GetAllUsecase().Execute(last{{.DomainEntity}}ID, int64(pageSize))
 	if err != nil {
 		logger().Errorf("An error occurred while trying to Get the {{.DomainEntity}} List: %s", err.Error())
 		return c.JSON(err.(domain.GenericError).Code, err)
 	}
 
-	return c.JSON(http.StatusOK, {{.DomainEntityLowerCamel}}s)
+	return c.JSON(http.StatusOK, {{.DomainEntityLowerCamel}}List)
 }
 
 //Get{{.DomainEntity}} provided the {{.DomainEntityLowerCamel}}Id
