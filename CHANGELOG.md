@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2020-06-23
+
+### Changed
+- Removed usecase new_domain_update_usecase from domain package
+- model_error template fixed
+- new_domain_controller adjusted
+- use cases adjusted
+- repository adjusted
+- Improved route pattern
+
 ## [0.1.0] - 2020-06-23
 
 ### Added

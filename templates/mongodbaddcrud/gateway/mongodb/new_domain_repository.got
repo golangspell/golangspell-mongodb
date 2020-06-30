@@ -79,7 +79,7 @@ func (repo *{{.DomainEntity}}Repository) Update({{.DomainEntityLowerCamel}} *dom
 	filter := bson.M{"_id": {{.DomainEntityLowerCamel}}.ID}
 	existentCount, err := collection.CountDocuments(ctx, filter)
 	if err != nil {
-		return nil, domain.ApplicationError(fmt.Sprintf("Could not count the {{.DomainEntityLowerCamel}}s with ID = %s - Message: %s", {{.DomainEntityLowerCamel}}.ID.Hex(), err.Error()))
+		return nil, domain.InternalError(fmt.Sprintf("Could not count the {{.DomainEntityLowerCamel}}s with ID = %s - Message: %s", {{.DomainEntityLowerCamel}}.ID.Hex(), err.Error()))
 	}
 	if existentCount == 0 {
 		msg := fmt.Sprintf("The {{.DomainEntityLowerCamel}} %s was not found", {{.DomainEntityLowerCamel}}.ID.Hex())
@@ -89,7 +89,7 @@ func (repo *{{.DomainEntity}}Repository) Update({{.DomainEntityLowerCamel}} *dom
 	{{.DomainEntityLowerCamel}}.DateUpdated = time.Now()
 	_, err = collection.ReplaceOne(ctx, filter, {{.DomainEntityLowerCamel}})
 	if err != nil {
-		return nil, domain.ApplicationError(fmt.Sprintf("Could not update the {{.DomainEntityLowerCamel}} with ID = %s - Message: %s", {{.DomainEntityLowerCamel}}.ID.Hex(), err.Error()))
+		return nil, domain.InternalError(fmt.Sprintf("Could not update the {{.DomainEntityLowerCamel}} with ID = %s - Message: %s", {{.DomainEntityLowerCamel}}.ID.Hex(), err.Error()))
 	}
 	return {{.DomainEntityLowerCamel}}, nil
 
@@ -117,7 +117,7 @@ func (repo *{{.DomainEntity}}Repository) GetAll(last{{.DomainEntity}}ID string, 
 	cur, err := collection.Find(ctx, dbfilter, opts)
 	defer func() { _ = cur.Close(ctx) }()
 	if err != nil {
-		return nil, domain.InternalError(fmt.Sprintf("An error occurred while trying to find the {{.DomainEntityLowerCamel}}s. SsmId: %s - Filters: %+v. Message: %s", ssmID, filter, err.Error()))
+		return nil, domain.InternalError(fmt.Sprintf("An error occurred while trying to find the {{.DomainEntityLowerCamel}} List. Message: %s", err.Error()))
 	}
 	for cur.Next(ctx) {
 		var result domain.{{.DomainEntity}}
@@ -128,7 +128,7 @@ func (repo *{{.DomainEntity}}Repository) GetAll(last{{.DomainEntity}}ID string, 
 		{{.DomainEntityLowerCamel}}s = append({{.DomainEntityLowerCamel}}s, &result)
 	}
 	if err := cur.Err(); err != nil {
-		return nil, domain.InternalError(fmt.Sprintf("An error occured while trying to convert the list of {{.DomainEntity}}s from the database. Message: %s", err.Error()))
+		return nil, domain.InternalError(fmt.Sprintf("An error occured while trying to convert the list of {{.DomainEntity}} from the database. Message: %s", err.Error()))
 	}
 	return {{.DomainEntityLowerCamel}}s, nil
 }

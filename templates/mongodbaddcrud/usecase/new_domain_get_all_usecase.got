@@ -19,7 +19,7 @@ func (u *{{.DomainEntity}}GetAll) Execute(last{{.DomainEntity}}ID string, pageSi
 
 	{{.DomainEntityLowerCamel}}s, err := u.{{.DomainEntityLowerCamel}}Repository.GetAll(last{{.DomainEntity}}ID, pageSize)
 	if err != nil {
-		msg := fmt.Sprintf("Could not get the {{.DomainEntity}}s. Message: %s\n", err.Error())
+		msg := fmt.Sprintf("Could not get the {{.DomainEntity}} list. Message: %s\n", err.Error())
 		logger().Error(msg)
 		return nil, err
 	}

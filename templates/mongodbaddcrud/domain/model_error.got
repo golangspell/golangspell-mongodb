@@ -18,12 +18,18 @@ type AlreadyExistsError struct {
 
 //AlreadyExists builds an specialized Already Exists Error
 func AlreadyExists(message string) AlreadyExistsError {
-	return AlreadyExistsError{Code: 409, Message: message}
+	alreadyExists := AlreadyExistsError{}
+	alreadyExists.Code = 409
+	alreadyExists.Message = message
+	return alreadyExists
 }
 
 //InternalError builds an specialized Internal Error
 func InternalError(message string) GenericError {
-	return GenericError{Code: 500, Message: message}
+	internalError := GenericError{}
+	internalError.Code = 500
+	internalError.Message = message
+	return internalError
 }
 
 //ConstraintViolationError represents an specialized Constraint Violation Error
@@ -33,7 +39,10 @@ type ConstraintViolationError struct {
 
 //ConstraintViolation builds an specialized Constraint Violation Error
 func ConstraintViolation(message string) ConstraintViolationError {
-	return ConstraintViolationError{Code: 400, Message: message}
+	constraintViolation := ConstraintViolationError{}
+	constraintViolation.Code = 400
+	constraintViolation.Message = message
+	return constraintViolation
 }
 
 //NotFoundError represents an specialized Not Found Error
@@ -43,5 +52,8 @@ type NotFoundError struct {
 
 //NotFound builds an specialized Not Found Error
 func NotFound(message string) NotFoundError {
-	return NotFoundError{Code: 404, Message: message}
+	notFound := NotFoundError{}
+	notFound.Code = 404
+	notFound.Message = message
+	return notFound
 }

@@ -17,7 +17,7 @@ func (u *{{.DomainEntity}}Update) Execute({{.DomainEntityLowerCamel}} *domain.{{
 	defer logger().Sync()
 	logger().Debugf("{{.DomainEntity}} %+v \n", {{.DomainEntityLowerCamel}})
 
-	{{.DomainEntityLowerCamel}}, err = u.{{.DomainEntityLowerCamel}}Repository.Update({{.DomainEntityLowerCamel}})
+	_, err := u.{{.DomainEntityLowerCamel}}Repository.Update({{.DomainEntityLowerCamel}})
 	if err != nil {
 		logger().Errorf("Could not update {{.DomainEntityLowerCamel}} into repository. Error %s", err.Error())
 		return err

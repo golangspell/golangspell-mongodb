@@ -17,7 +17,7 @@ func (u *{{.DomainEntity}}Create) Execute({{.DomainEntityLowerCamel}} *domain.{{
 	defer logger().Sync()
 	logger().Debugf("{{.DomainEntity}} %+v \n", {{.DomainEntityLowerCamel}})
 
-	{{.DomainEntityLowerCamel}}, err = u.{{.DomainEntityLowerCamel}}Repository.Save({{.DomainEntityLowerCamel}})
+	{{.DomainEntityLowerCamel}}, err := u.{{.DomainEntityLowerCamel}}Repository.Save({{.DomainEntityLowerCamel}})
 	if err != nil {
 		logger().Errorf("Could not save {{.DomainEntityLowerCamel}} into repository. Error %s", err.Error())
 		return nil, err

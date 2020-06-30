@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -21,8 +22,8 @@ func Create{{.DomainEntity}}(c echo.Context) error {
 	logger := config.GetLogger
 	defer logger().Sync()
 
-	{{.DomainEntityLowerCamel}} := domain.{{.DomainEntity}}{}
-	if err := c.Bind(&{{.DomainEntityLowerCamel}}); err != nil {
+	{{.DomainEntityLowerCamel}} := new(domain.{{.DomainEntity}})
+	if err := c.Bind({{.DomainEntityLowerCamel}}); err != nil {
 		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("An error occurred while trying to read the request body: "+err.Error()))
 	}
 
@@ -36,8 +37,8 @@ func Create{{.DomainEntity}}(c echo.Context) error {
 	return c.JSON(http.StatusCreated, {{.DomainEntityLowerCamel}})
 }
 
-//GetAll{{.DomainEntity}}s of the collection
-func GetAll{{.DomainEntity}}s(c echo.Context) error {
+//Get{{.DomainEntity}}List of the collection
+func Get{{.DomainEntity}}List(c echo.Context) error {
 	logger := config.GetLogger
 	defer logger().Sync()
 	var last{{.DomainEntity}}ID = c.QueryParam("last{{.DomainEntity}}Id")
@@ -56,9 +57,9 @@ func GetAll{{.DomainEntity}}s(c echo.Context) error {
 		}
 	}
 
-	{{.DomainEntityLowerCamel}}s, err := domain.Get{{.DomainEntity}}GetAllUsecase().Execute(last{{.DomainEntity}}ID, pageSize)
+	{{.DomainEntityLowerCamel}}s, err := domain.Get{{.DomainEntity}}GetAllUsecase().Execute(last{{.DomainEntity}}ID, int64(pageSize))
 	if err != nil {
-		logger().Errorf("An error occurred while trying to Get the {{.DomainEntity}}s: %s", err.Error())
+		logger().Errorf("An error occurred while trying to Get the {{.DomainEntity}} List: %s", err.Error())
 		return c.JSON(err.(domain.GenericError).Code, err)
 	}
 
@@ -99,10 +100,10 @@ func Update{{.DomainEntity}}(c echo.Context) error {
 	}
 
 	if {{.DomainEntityLowerCamel}}ID != {{.DomainEntityLowerCamel}}.ID.Hex() {
-		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("The content of the URL Path Parameter {{.DomainEntityLowerCamel}}ID is different of the Body's {{.DomainEntityLowerCamel}}.ID"))
+		return c.JSON(http.StatusBadRequest, domain.ConstraintViolation("The content of the URL Path Parameter {{.DomainEntityLowerCamel}}Id is different of the Body's {{.DomainEntityLowerCamel}}.ID"))
 	}
 
-	err = domain.Get{{.DomainEntity}}UpdateUsecase().Execute({{.DomainEntityLowerCamel}})
+	err := domain.Get{{.DomainEntity}}UpdateUsecase().Execute(&{{.DomainEntityLowerCamel}})
 	if err != nil {
 		logger().Errorf("An error occurred while trying to Update the {{.DomainEntity}}: %s", err.Error())
 		return c.JSON(err.(domain.GenericError).Code, err)
