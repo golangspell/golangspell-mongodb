@@ -37,6 +37,34 @@ func addComponentConstantToContext(currentPath string, constantDefinition string
 	return nil
 }
 
+func addImportToMain(currentPath string, importPath string) error {
+	filePath := fmt.Sprintf("%s%smain.go", currentPath, toolconfig.PlatformSeparator)
+	renderer := domain.GetRenderer()
+	err := renderer.BackupExistingCode(filePath)
+	if err != nil {
+		return fmt.Errorf("An error occurred while trying to backup the main file. Error: %s", err.Error())
+	}
+	content, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("An error occurred while trying to read the main file. Error: %s", err.Error())
+	}
+
+	if strings.Contains(string(content), importPath) {
+		return nil
+	}
+
+	code := strings.ReplaceAll(
+		string(content),
+		"/config\"\n",
+		fmt.Sprintf("/config\"\n_ \"%s\"\n", importPath))
+	err = ioutil.WriteFile(filePath, []byte(code), 0644)
+	if err != nil {
+		return fmt.Errorf("An error occurred while trying to update the main file. Error: %s", err.Error())
+	}
+
+	return nil
+}
+
 func renameTemplateFileNames(currentPath string, domainEntity string) error {
 	sourcePath := fmt.Sprintf("%s%sdomain%smodel_new_domain.go", currentPath, toolconfig.PlatformSeparator, toolconfig.PlatformSeparator)
 	directory := filepath.Dir(sourcePath)
@@ -205,6 +233,22 @@ func RendermongodbaddcrudTemplate(args []string) error {
 		fmt.Sprintf("%sDeleteUsecase = \"%sDeleteUsecase\"", domainEntity, domainEntity))
 	if err != nil {
 		fmt.Println(err.Error())
+		return err
+	}
+
+	err = addImportToMain(
+		currentPath,
+		fmt.Sprintf("%s/gateway/mongodb", moduleName))
+	if err != nil {
+		fmt.Printf("An error occurred while trying to add the import to main. Error: %s\n", err.Error())
+		return err
+	}
+
+	err = addImportToMain(
+		currentPath,
+		fmt.Sprintf("%s/usecase", moduleName))
+	if err != nil {
+		fmt.Printf("An error occurred while trying to add the import to main. Error: %s\n", err.Error())
 		return err
 	}
 
