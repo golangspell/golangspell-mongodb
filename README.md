@@ -24,11 +24,15 @@ golangci-lint run
 
 ## Install
 To install the golangspell-mongodb spell use the command
+```sh
 golangspell addspell github.com/golangspell/golangspell-mongodb golangspell-mongodb
+```
 
 ## Update
 To update the golangspell-core version use the command
+```sh
 golangspell updatespell github.com/golangspell/golangspell-mongodb golangspell-mongodb
+```
 
 ## After installing, the Golangspell MongoDB commands will be available in the platform help:
 ```sh
