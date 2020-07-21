@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] - 2020-07-21
+
+### Added
+- Added domain validation method
+
 ## [0.1.5] - 2020-06-30
 
 ### Changed

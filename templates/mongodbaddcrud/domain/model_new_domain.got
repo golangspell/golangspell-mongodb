@@ -22,6 +22,17 @@
 	 DateUpdated time.Time `bson:"dateUpdated,omitempty" json:"dateUpdated,omitempty"`
  }
  
+//Valid checks if the instance is in a valid state.
+//If the state is not valid, returns an domain.IdentifiableError (warning: it is important to return a domain.IdentifiableError following the example) availabe in the model_error.go file
+func ({{.DomainEntityLowerCamel}} *{{.DomainEntity}}) Valid() (bool, error) {
+	//TODO: Add here your validation logic
+	//Example:
+	// if strings.TrimSpace({{.DomainEntityLowerCamel}}.myRequiredAttribute) == "" {
+	// 	return false, ConstraintViolation("The {{.DomainEntity}} is invalid. The required attribute 'myRequiredAttribute' is missing")
+	// }
+	return true, nil
+}
+
  //{{.DomainEntity}}Repository is the specification of the features delivered by a Repository for a {{.DomainEntity}}
  type {{.DomainEntity}}Repository interface {
 	 appcontext.Component
