@@ -27,6 +27,7 @@ To install the golangspell-mongodb spell use the command
 ```sh
 golangspell addspell github.com/golangspell/golangspell-mongodb golangspell-mongodb
 ```
+This action should be done only once. After doing it, the golangspell-mongodb Spell is installed in your computer and ready for being used
 
 ## Update
 To update the golangspell-core version use the command
@@ -38,3 +39,18 @@ golangspell updatespell github.com/golangspell/golangspell-mongodb golangspell-m
 ```sh
 golangspell help
 ```
+
+## Before executing the Golangspell MongoDB commands (mongodbinit, for example), it is necessary to be inside the root directory of an application initialized with the command:
+```sh
+golangspell init [module] [appname]
+```
+More details can be found with the command:
+
+```sh
+golangspell help init
+```
+
+Find more insights on how to use **golangspell** here:
+
+* [Golangspell Wiki](https://github.com/golangspell/golangspell/wiki)
+* [Golangspell Article](https://medium.com/golangspell-go-fast-small-and-productive/go-fast-small-and-productive-with-golangspell-be193c65a382)
