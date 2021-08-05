@@ -33,7 +33,7 @@ func addEnvironmentVariable(currentPath string) error {
 	code = strings.ReplaceAll(
 		code,
 		"func init() {\n",
-		"func init() {\n_ = viper.BindEnv(\"DBConnectionString\", \"DB_CONNECTION_STRING\")\n_ = viper.BindEnv(\"DBConnectionCertificateFileName\", \"DB_CONNECTION_CERTIFICATE_FILE_NAME\")\n")
+		"func init() {\nValues.DBConnectionString = GetEnv(\"DB_CONNECTION_STRING\", \"\")\nValues.DBConnectionCertificateFileName = GetEnv(\"DB_CONNECTION_CERTIFICATE_FILE_NAME\", \"\")\n")
 
 	err = ioutil.WriteFile(filePath, []byte(code), 0644)
 	if err != nil {
