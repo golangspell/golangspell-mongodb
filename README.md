@@ -4,8 +4,6 @@ Golang Spell MongoDB is the spell designed for adding the MongoDB infrastructure
 ## Golang Spell
 The Golang Spell MongoDB contains the specific commands (and the respective templates) for building MongoDB backed projects in the platform [Golang Spell](https://github.com/golangspell/golangspell).
 
-![alt text](https://golangspell.com/golangspell/blob/master/img/gopher_spell.png?raw=true)
-
 ## Test and coverage
 
 Run the tests
@@ -53,4 +51,9 @@ golangspell help init
 Find more insights on how to use **golangspell** here:
 
 * [Golangspell Wiki](https://github.com/golangspell/golangspell/wiki)
-* [Golangspell Article](https://medium.com/golangspell-go-fast-small-and-productive/go-fast-small-and-productive-with-golangspell-be193c65a382)
+* [Golangspell Article - Medium](https://medium.com/golangspell-go-fast-small-and-productive/go-fast-small-and-productive-with-golangspell-be193c65a382)
+* [Golangspell Article - HackerNoon](https://hackernoon.com/go-fast-small-and-productive-with-golangspell-d0163zqk)
+
+<p align="center">
+    <img src="https://github.com/golangspell/golangspell/blob/master/img/gopher_spell.png" width="350" alt="Golang Spell logo"/>
+</p>
