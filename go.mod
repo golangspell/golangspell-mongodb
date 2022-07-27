@@ -3,7 +3,7 @@ module github.com/golangspell/golangspell-mongodb
 go 1.12
 
 require (
-	github.com/golangspell/golangspell v0.4.6
+	github.com/golangspell/golangspell v0.4.7
 	github.com/iancoleman/strcase v0.2.0
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/spf13/cobra v1.5.0
