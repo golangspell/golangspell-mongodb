@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	
+
 	"github.com/golangspell/golangspell-mongodb/cmd"
 	_ "github.com/golangspell/golangspell-mongodb/config"
-	_ "github.com/golangspell/golangspell-mongodb/gateway/template"
 	_ "github.com/golangspell/golangspell-mongodb/gateway/customlog"
-
+	_ "github.com/golangspell/golangspell-mongodb/gateway/template"
+	_ "github.com/golangspell/golangspell/gateway/filesystem"
 )
 
 func main() {
