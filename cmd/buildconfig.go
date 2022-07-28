@@ -5,7 +5,7 @@ import (
 
 	"encoding/json"
 
-	"github.com/golangspell/golangspell/config"
+	"github.com/golangspell/golangspell-mongodb/config"
 	"github.com/golangspell/golangspell/domain"
 	"github.com/spf13/cobra"
 )
