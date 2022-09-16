@@ -5,8 +5,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,7 +26,7 @@ type MongoClient struct {
 
 func getCustomTLSConfig(caFile string) (*tls.Config, error) {
 	tlsConfig := new(tls.Config)
-	certs, err := ioutil.ReadFile(caFile)
+	certs, err := os.ReadFile(caFile)
 
 	if err != nil {
 		return tlsConfig, err
@@ -36,7 +36,7 @@ func getCustomTLSConfig(caFile string) (*tls.Config, error) {
 	ok := tlsConfig.RootCAs.AppendCertsFromPEM(certs)
 
 	if !ok {
-		return tlsConfig, errors.New("Failed parsing pem file")
+		return tlsConfig, errors.New("failed parsing pem file")
 	}
 
 	return tlsConfig, nil
