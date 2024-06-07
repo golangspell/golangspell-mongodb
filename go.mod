@@ -4,7 +4,7 @@ go 1.22.4
 
 require (
 	github.com/golangspell/golangspell v0.4.8
-	github.com/golangspell/golangspell-core v0.6.4
+	github.com/golangspell/golangspell-core v0.6.5
 	github.com/iancoleman/strcase v0.3.0
 	github.com/spf13/cobra v1.8.0
 	go.uber.org/zap v1.27.0

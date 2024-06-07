@@ -3,8 +3,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golangspell/golangspell v0.4.8 h1:oES0FGvmuxBx2tVVw0qZl2IcNqo0Y9j46LxHt/zqay4=
 github.com/golangspell/golangspell v0.4.8/go.mod h1:y89P5Osd576RagEA+wgHpZKenVX4o2qKAksfEfhCJ/8=
-github.com/golangspell/golangspell-core v0.6.4 h1:hhO7WNxfihXwPMhxfz31+G0j87d42FM9Vq4S26W0dEo=
-github.com/golangspell/golangspell-core v0.6.4/go.mod h1:76NQf3jINakNtRlWa/MVJ3o0an/jiR8GdbKYAcycIU0=
+github.com/golangspell/golangspell-core v0.6.5 h1:7kwDuKvOeQzK7vrxGZ6KLMRoxm3ZZ/8M5LTrg3azRes=
+github.com/golangspell/golangspell-core v0.6.5/go.mod h1:76NQf3jINakNtRlWa/MVJ3o0an/jiR8GdbKYAcycIU0=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
