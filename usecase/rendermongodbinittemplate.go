@@ -49,5 +49,13 @@ func RendermongodbinitTemplate(args []string) error {
 		fmt.Printf("An error occurred while trying to configure the context. Error: %s\n", err.Error())
 		return err
 	}
+	err = addImportToMain(
+		moduleName,
+		currentPath,
+		fmt.Sprintf("%s/gateway/mongodb", moduleName))
+	if err != nil {
+		fmt.Printf("an error occurred while trying to add the import to main. Error: %s\n", err.Error())
+		return err
+	}
 	return renderer.RenderTemplate(spell, "mongodbinit", globalVariables, nil)
 }
