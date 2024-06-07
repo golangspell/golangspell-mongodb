@@ -38,21 +38,6 @@ Syntax:
 golangspell build-config
 `,
 			},
-			"golangspell-mongodb-hello": &domain.Command{
-				Name:             "golangspell-mongodb-hello",
-				ShortDescription: "The golangspell-mongodb-hello says Hello! using your new Golangspell base structure",
-				LongDescription: `The golangspell-mongodb-hello says Hello! using your new Golangspell base structure
-The Architectural Model is based in the Clean Architecture and is the basis to add more resources like domain models and repositories.
-You can use this as a template to create your own commands. 
-Please notice that ALL your commands must be prefixed with the name of your Spell (golangspell-mongodb). It will avoid name colision with the Spells from other authors 
-Args:
-name: Your name (required) to be added to the Hello!. Example: Elvis"
-
-Syntax: 
-golangspell golangspell-mongodb-hello [name]
-`,
-				ValidArgs: []string{"name"},
-			},
 			"mongodbinit": &domain.Command{
 				Name:             "mongodbinit",
 				ShortDescription: "The mongodbinit initializes the application with the Mongo DB infrastructure",

@@ -2,75 +2,29 @@ package usecase
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"strings"
 
+	coreusecase "github.com/golangspell/golangspell-core/usecase"
 	"github.com/golangspell/golangspell-mongodb/appcontext"
 	"github.com/golangspell/golangspell-mongodb/domain"
 	toolconfig "github.com/golangspell/golangspell/config"
 	tooldomain "github.com/golangspell/golangspell/domain"
 )
 
-func addEnvironmentVariable(currentPath string) error {
-	filePath := fmt.Sprintf("%s%sconfig%senvironment.go", currentPath, toolconfig.PlatformSeparator, toolconfig.PlatformSeparator)
-	renderer := domain.GetRenderer()
-	err := renderer.BackupExistingCode(filePath)
-	if err != nil {
-		fmt.Printf("An error occurred while trying to backup the environment file. Error: %s\n", err.Error())
-		return err
-	}
-	content, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		fmt.Printf("An error occurred while trying to read the environment file. Error: %s\n", err.Error())
-		return err
-	}
-
-	code := strings.ReplaceAll(
-		string(content),
-		"type Config struct {\n",
-		"type Config struct {\n//DBConnectionString to connect to Mongo\nDBConnectionString string\n//DBConnectionCertificateFileName defines the TLS Certificate for DB Connections. If not set, no TLS is configured\nDBConnectionCertificateFileName string\n")
-	code = strings.ReplaceAll(
-		code,
-		"func init() {\n",
-		"func init() {\nValues.DBConnectionString = GetEnv(\"DB_CONNECTION_STRING\", \"\")\nValues.DBConnectionCertificateFileName = GetEnv(\"DB_CONNECTION_CERTIFICATE_FILE_NAME\", \"\")\n")
-
-	err = ioutil.WriteFile(filePath, []byte(code), 0644)
+func addEnvironmentVariables(currentPath string) error {
+	err := coreusecase.GetAddEnvironmentVariable().Execute(currentPath, "DBConnectionString", "string", "`env:\"DB_CONNECTION_STRING\" envDefault:\"\"`")
 	if err != nil {
 		fmt.Printf("An error occurred while trying to update the environment file. Error: %s\n", err.Error())
 		return err
 	}
-
-	return nil
+	return coreusecase.GetAddEnvironmentVariable().Execute(currentPath, "DBConnectionCertificateFileName", "string", "`env:\"DB_CONNECTION_CERTIFICATE_FILE_NAME\" envDefault:\"\"`")
 }
 
 func addClientToContext(currentPath string) error {
-	filePath := fmt.Sprintf("%s%sappcontext%scontext.go", currentPath, toolconfig.PlatformSeparator, toolconfig.PlatformSeparator)
-	renderer := domain.GetRenderer()
-	err := renderer.BackupExistingCode(filePath)
-	if err != nil {
-		fmt.Printf("An error occurred while trying to backup the context file. Error: %s\n", err.Error())
-		return err
-	}
-	content, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		fmt.Printf("An error occurred while trying to read the context file. Error: %s\n", err.Error())
-		return err
-	}
-	code := strings.ReplaceAll(
-		string(content),
-		"const (\n",
-		"const (\nDBClient = \"DBClient\"\n")
-	err = ioutil.WriteFile(filePath, []byte(code), 0644)
-	if err != nil {
-		fmt.Printf("An error occurred while trying to update the context file. Error: %s\n", err.Error())
-		return err
-	}
-
-	return nil
+	return coreusecase.GetAddComponentConstantToContext().Execute(currentPath, "DBClient")
 }
 
-//RendermongodbinitTemplate renders the templates defined to the mongodbinit command with the proper variables
+// RendermongodbinitTemplate renders the templates defined to the mongodbinit command with the proper variables
 func RendermongodbinitTemplate(args []string) error {
 	spell := appcontext.Current.Get(appcontext.Spell).(tooldomain.Spell)
 	renderer := domain.GetRenderer()
@@ -85,7 +39,7 @@ func RendermongodbinitTemplate(args []string) error {
 		"ModuleName":   moduleName,
 	}
 
-	err = addEnvironmentVariable(currentPath)
+	err = addEnvironmentVariables(currentPath)
 	if err != nil {
 		fmt.Printf("An error occurred while trying to configure the environment. Error: %s\n", err.Error())
 		return err

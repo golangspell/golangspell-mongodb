@@ -2,11 +2,12 @@ package usecase
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
+	coredomain "github.com/golangspell/golangspell-core/domain"
+	coreusecase "github.com/golangspell/golangspell-core/usecase"
 	"github.com/golangspell/golangspell-mongodb/appcontext"
 	"github.com/golangspell/golangspell-mongodb/domain"
 	toolconfig "github.com/golangspell/golangspell/config"
@@ -14,55 +15,12 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func addComponentConstantToContext(currentPath string, constantDefinition string) error {
-	filePath := fmt.Sprintf("%s%sappcontext%scontext.go", currentPath, toolconfig.PlatformSeparator, toolconfig.PlatformSeparator)
-	renderer := domain.GetRenderer()
-	err := renderer.BackupExistingCode(filePath)
-	if err != nil {
-		return fmt.Errorf("An error occurred while trying to backup the context file. Error: %s", err.Error())
-	}
-	content, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return fmt.Errorf("An error occurred while trying to read the context file. Error: %s", err.Error())
-	}
-	code := strings.ReplaceAll(
-		string(content),
-		"const (\n",
-		fmt.Sprintf("const (\n%s\n", constantDefinition))
-	err = ioutil.WriteFile(filePath, []byte(code), 0644)
-	if err != nil {
-		return fmt.Errorf("An error occurred while trying to update the context file. Error: %s", err.Error())
-	}
-
-	return nil
+func addComponentConstantToContext(currentPath string, componentName string) error {
+	return coreusecase.GetAddComponentConstantToContext().Execute(currentPath, componentName)
 }
 
-func addImportToMain(currentPath string, importPath string) error {
-	filePath := fmt.Sprintf("%s%smain.go", currentPath, toolconfig.PlatformSeparator)
-	renderer := domain.GetRenderer()
-	err := renderer.BackupExistingCode(filePath)
-	if err != nil {
-		return fmt.Errorf("An error occurred while trying to backup the main file. Error: %s", err.Error())
-	}
-	content, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return fmt.Errorf("An error occurred while trying to read the main file. Error: %s", err.Error())
-	}
-
-	if strings.Contains(string(content), importPath) {
-		return nil
-	}
-
-	code := strings.ReplaceAll(
-		string(content),
-		"/config\"\n",
-		fmt.Sprintf("/config\"\n_ \"%s\"\n", importPath))
-	err = ioutil.WriteFile(filePath, []byte(code), 0644)
-	if err != nil {
-		return fmt.Errorf("An error occurred while trying to update the main file. Error: %s", err.Error())
-	}
-
-	return nil
+func addImportToMain(moduleName string, currentPath string, importPath string) error {
+	return coreusecase.GetAddPackageImportToMain().Execute(moduleName, currentPath, importPath)
 }
 
 func renameTemplateFileNames(currentPath string, domainEntity string) error {
@@ -137,34 +95,42 @@ func renameTemplateFileNames(currentPath string, domainEntity string) error {
 }
 
 func addNewRoutes(currentPath string, domainEntity string) error {
-	filePath := fmt.Sprintf("%s%scontroller%srouter.go", currentPath, toolconfig.PlatformSeparator, toolconfig.PlatformSeparator)
-	renderer := domain.GetRenderer()
-	err := renderer.BackupExistingCode(filePath)
-	if err != nil {
-		return fmt.Errorf("An error occurred while trying to backup the context file. Error: %s", err.Error())
-	}
-	content, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return fmt.Errorf("An error occurred while trying to read the context file. Error: %s", err.Error())
-	}
-	code := strings.ReplaceAll(
-		string(content),
-		"g.GET(\"/info\", GetInfo)\n",
-		fmt.Sprintf("g.GET(\"/info\", GetInfo)\ng.GET(\"/%s\", Get%sList)\ng.POST(\"/%s\", Create%s)\ng.GET(\"/%s/:%sId\", Get%s)\ng.PUT(\"/%s/:%sId\", Update%s)\ng.DELETE(\"/%s/:%sId\", Delete%s)\n",
-			strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity),
-			strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity),
-			strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity),
-			strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity),
-			strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)))
-	err = ioutil.WriteFile(filePath, []byte(code), 0644)
-	if err != nil {
-		return fmt.Errorf("An error occurred while trying to add the new REST routes. Error: %s", err.Error())
-	}
-
-	return nil
+	routerFilePath := fmt.Sprintf("%s%scontroller%srouter.go", currentPath, toolconfig.PlatformSeparator, toolconfig.PlatformSeparator)
+	return new(coredomain.CodeFile).
+		ParseFromPath(routerFilePath).
+		AddStatementToFunction(
+			"MapRoutes",
+			fmt.Sprintf(`g.GET(\"/%s\", Get%sList)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)),
+			func(statementCode string) bool {
+				return strings.Contains(statementCode, "GET(\"/info\", GetInfo)")
+			}).
+		AddStatementToFunction(
+			"MapRoutes",
+			fmt.Sprintf(`g.POST(\"/%s\", Create%s)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)),
+			func(statementCode string) bool {
+				return strings.Contains(statementCode, fmt.Sprintf(`g.GET(\"/%s\", Get%sList)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)))
+			}).
+		AddStatementToFunction(
+			"MapRoutes",
+			fmt.Sprintf(`g.GET(\"/%s/:%sId\", Get%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)),
+			func(statementCode string) bool {
+				return strings.Contains(statementCode, fmt.Sprintf(`g.POST(\"/%s\", Create%s)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)))
+			}).
+		AddStatementToFunction(
+			"MapRoutes",
+			fmt.Sprintf(`g.PUT(\"/%s/:%sId\", Update%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)),
+			func(statementCode string) bool {
+				return strings.Contains(statementCode, fmt.Sprintf(`g.GET(\"/%s/:%sId\", Get%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)))
+			}).
+		AddStatementToFunction(
+			"MapRoutes",
+			fmt.Sprintf(`g.DELETE(\"/%s/:%sId\", Delete%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)),
+			func(statementCode string) bool {
+				return strings.Contains(statementCode, fmt.Sprintf(`g.PUT(\"/%s/:%sId\", Update%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)))
+			}).Save()
 }
 
-//RendermongodbaddcrudTemplate renders the templates defined to the mongodbaddcrud command with the proper variables
+// RendermongodbaddcrudTemplate renders the templates defined to the mongodbaddcrud command with the proper variables
 func RendermongodbaddcrudTemplate(args []string) error {
 	spell := appcontext.Current.Get(appcontext.Spell).(tooldomain.Spell)
 	renderer := domain.GetRenderer()
@@ -190,7 +156,7 @@ func RendermongodbaddcrudTemplate(args []string) error {
 
 	err = addComponentConstantToContext(
 		currentPath,
-		fmt.Sprintf("%sRepository = \"%sRepository\"", domainEntity, domainEntity))
+		fmt.Sprintf("%sRepository", domainEntity))
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
@@ -198,7 +164,7 @@ func RendermongodbaddcrudTemplate(args []string) error {
 
 	err = addComponentConstantToContext(
 		currentPath,
-		fmt.Sprintf("%sCreateUsecase = \"%sCreateUsecase\"", domainEntity, domainEntity))
+		fmt.Sprintf("%sCreateUsecase", domainEntity))
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
@@ -206,7 +172,7 @@ func RendermongodbaddcrudTemplate(args []string) error {
 
 	err = addComponentConstantToContext(
 		currentPath,
-		fmt.Sprintf("%sGetAllUsecase = \"%sGetAllUsecase\"", domainEntity, domainEntity))
+		fmt.Sprintf("%sGetAllUsecase", domainEntity))
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
@@ -214,7 +180,7 @@ func RendermongodbaddcrudTemplate(args []string) error {
 
 	err = addComponentConstantToContext(
 		currentPath,
-		fmt.Sprintf("%sGetByIDUsecase = \"%sGetByIDUsecase\"", domainEntity, domainEntity))
+		fmt.Sprintf("%sGetByIDUsecase", domainEntity))
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
@@ -222,7 +188,7 @@ func RendermongodbaddcrudTemplate(args []string) error {
 
 	err = addComponentConstantToContext(
 		currentPath,
-		fmt.Sprintf("%sUpdateUsecase = \"%sUpdateUsecase\"", domainEntity, domainEntity))
+		fmt.Sprintf("%sUpdateUsecase", domainEntity))
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
@@ -230,31 +196,33 @@ func RendermongodbaddcrudTemplate(args []string) error {
 
 	err = addComponentConstantToContext(
 		currentPath,
-		fmt.Sprintf("%sDeleteUsecase = \"%sDeleteUsecase\"", domainEntity, domainEntity))
+		fmt.Sprintf("%sDeleteUsecase", domainEntity))
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
 
 	err = addImportToMain(
+		moduleName,
 		currentPath,
 		fmt.Sprintf("%s/gateway/mongodb", moduleName))
 	if err != nil {
-		fmt.Printf("An error occurred while trying to add the import to main. Error: %s\n", err.Error())
+		fmt.Printf("an error occurred while trying to add the import to main. Error: %s\n", err.Error())
 		return err
 	}
 
 	err = addImportToMain(
+		moduleName,
 		currentPath,
 		fmt.Sprintf("%s/usecase", moduleName))
 	if err != nil {
-		fmt.Printf("An error occurred while trying to add the import to main. Error: %s\n", err.Error())
+		fmt.Printf("an error occurred while trying to add the import to main. Error: %s\n", err.Error())
 		return err
 	}
 
 	err = renameTemplateFileNames(currentPath, domainEntity)
 	if err != nil {
-		fmt.Printf("An error occurred while trying to rename the rendered template files. Error: %s\n", err.Error())
+		fmt.Printf("an error occurred while trying to rename the rendered template files. Error: %s\n", err.Error())
 		return err
 	}
 
