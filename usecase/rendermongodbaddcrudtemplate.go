@@ -100,33 +100,33 @@ func addNewRoutes(currentPath string, domainEntity string) error {
 		ParseFromPath(routerFilePath).
 		AddStatementToFunction(
 			"MapRoutes",
-			fmt.Sprintf(`g.GET(\"/%s\", Get%sList)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)),
+			fmt.Sprintf(`g.GET("/%s", Get%sList)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)),
 			func(statementCode string) bool {
 				return strings.Contains(statementCode, "GET(\"/info\", GetInfo)")
 			}).
 		AddStatementToFunction(
 			"MapRoutes",
-			fmt.Sprintf(`g.POST(\"/%s\", Create%s)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)),
+			fmt.Sprintf(`g.POST("/%s", Create%s)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)),
 			func(statementCode string) bool {
-				return strings.Contains(statementCode, fmt.Sprintf(`g.GET(\"/%s\", Get%sList)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)))
+				return strings.Contains(statementCode, fmt.Sprintf(`g.GET("/%s", Get%sList)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)))
 			}).
 		AddStatementToFunction(
 			"MapRoutes",
-			fmt.Sprintf(`g.GET(\"/%s/:%sId\", Get%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)),
+			fmt.Sprintf(`g.GET("/%s/:%sId", Get%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)),
 			func(statementCode string) bool {
 				return strings.Contains(statementCode, fmt.Sprintf(`g.POST(\"/%s\", Create%s)`, strcase.ToKebab(domainEntity), strcase.ToCamel(domainEntity)))
 			}).
 		AddStatementToFunction(
 			"MapRoutes",
-			fmt.Sprintf(`g.PUT(\"/%s/:%sId\", Update%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)),
+			fmt.Sprintf(`g.PUT("/%s/:%sId", Update%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)),
 			func(statementCode string) bool {
-				return strings.Contains(statementCode, fmt.Sprintf(`g.GET(\"/%s/:%sId\", Get%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)))
+				return strings.Contains(statementCode, fmt.Sprintf(`g.GET("/%s/:%sId", Get%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)))
 			}).
 		AddStatementToFunction(
 			"MapRoutes",
-			fmt.Sprintf(`g.DELETE(\"/%s/:%sId\", Delete%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)),
+			fmt.Sprintf(`g.DELETE("/%s/:%sId", Delete%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)),
 			func(statementCode string) bool {
-				return strings.Contains(statementCode, fmt.Sprintf(`g.PUT(\"/%s/:%sId\", Update%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)))
+				return strings.Contains(statementCode, fmt.Sprintf(`g.PUT("/%s/:%sId", Update%s)`, strcase.ToKebab(domainEntity), strcase.ToLowerCamel(domainEntity), strcase.ToCamel(domainEntity)))
 			}).Save()
 }
 
