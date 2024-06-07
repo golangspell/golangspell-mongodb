@@ -15,10 +15,10 @@ import (
 	"{{.ModuleName}}/config"
 )
 
-//DatabaseName in MongoDB
+// DatabaseName in MongoDB
 const DatabaseName = "{{.DatabaseName}}"
 
-//MongoClient is a struct to keep the DB connection and URI
+// MongoClient is a struct to keep the DB connection and URI
 type MongoClient struct {
 	DBURI string
 	Conn  *mongo.Client
@@ -42,7 +42,7 @@ func getCustomTLSConfig(caFile string) (*tls.Config, error) {
 	return tlsConfig, nil
 }
 
-//buildMongoClientWithTLS creates the MongoClient instance with TLS encryption
+// buildMongoClientWithTLS creates the MongoClient instance with TLS encryption
 func buildMongoClientWithTLS() appcontext.Component {
 	var mongoClient = MongoClient{}
 
@@ -54,14 +54,10 @@ func buildMongoClientWithTLS() appcontext.Component {
 	}
 
 	mongoClient.DBURI = config.Values.DBConnectionString
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoClient.DBURI).SetTLSConfig(tlsConfig))
+	ctx := context.Background()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoClient.DBURI).SetTLSConfig(tlsConfig))
 	if err != nil {
 		log.Fatal("An error occurred while trying to open a DB connection.  Error message: " + err.Error())
-	}
-	ctx := context.Background()
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal("An error occurred while trying to open a DB connection. Error message: " + err.Error())
 	}
 
 	err = client.Ping(ctx, nil)
@@ -72,19 +68,15 @@ func buildMongoClientWithTLS() appcontext.Component {
 	return &mongoClient
 }
 
-//buildMongoClient creates the MongoClient instance
+// buildMongoClient creates the MongoClient instance
 func buildMongoClient() appcontext.Component {
 	var mongoClient = MongoClient{}
 
 	mongoClient.DBURI = config.Values.DBConnectionString
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoClient.DBURI))
+	ctx := context.Background()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoClient.DBURI))
 	if err != nil {
 		log.Fatal("An error occurred while trying to open a DB connection.  Error message: " + err.Error())
-	}
-	ctx := context.Background()
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal("An error occurred while trying to open a DB connection. Error message: " + err.Error())
 	}
 
 	err = client.Ping(ctx, nil)
@@ -95,7 +87,7 @@ func buildMongoClient() appcontext.Component {
 	return &mongoClient
 }
 
-//StartTransactionalSession starts a Database Session with an open Transaction
+// StartTransactionalSession starts a Database Session with an open Transaction
 func (client *MongoClient) StartTransactionalSession() (mongo.Session, error) {
 	var session mongo.Session
 	var err error
@@ -109,7 +101,7 @@ func (client *MongoClient) StartTransactionalSession() (mongo.Session, error) {
 	return session, nil
 }
 
-//CollectionExists in the Database?
+// CollectionExists in the Database?
 func CollectionExists(db *mongo.Database, collectionName string) (bool, error) {
 	ctx := context.Background()
 	options := options.ListCollectionsOptions{}
