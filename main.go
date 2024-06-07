@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	_ "github.com/golangspell/golangspell-core/gateway/template"
+	_ "github.com/golangspell/golangspell-core/usecase"
 	"github.com/golangspell/golangspell-mongodb/cmd"
 	_ "github.com/golangspell/golangspell-mongodb/config"
 	_ "github.com/golangspell/golangspell-mongodb/gateway/customlog"
