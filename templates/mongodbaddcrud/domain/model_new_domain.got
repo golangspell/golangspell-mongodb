@@ -36,7 +36,7 @@ func ({{.DomainEntityLowerCamel}} *{{.DomainEntity}}) Valid() (bool, error) {
  //{{.DomainEntity}}Repository is the specification of the features delivered by a Repository for a {{.DomainEntity}}
  type {{.DomainEntity}}Repository interface {
 	 appcontext.Component
-	 GetAll(last{{.DomainEntity}}ID string, pageSize int64) ([]*{{.DomainEntity}}, error)
+	 GetAll(offset int64, pageSize int64, sortFields map[string]int64) ([]*{{.DomainEntity}}, error)
 	 Get(id string) (*{{.DomainEntity}}, error)
 	 Save({{.DomainEntityLowerCamel}} *{{.DomainEntity}}) (*{{.DomainEntity}}, error)
 	 Update({{.DomainEntityLowerCamel}} *{{.DomainEntity}}) (*{{.DomainEntity}}, error)
@@ -48,7 +48,7 @@ type {{.DomainEntity}}CreateUsecase interface {
 }
 
 type {{.DomainEntity}}GetAllUsecase interface {
-	Execute(last{{.DomainEntity}}ID string, pageSize int64) ([]*{{.DomainEntity}}, error)
+	Execute(offset int64, pageSize int64, sortFields map[string]int64) ([]*{{.DomainEntity}}, error)
 }
 
 type {{.DomainEntity}}GetByIDUsecase interface {

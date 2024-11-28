@@ -93,23 +93,24 @@ func (repo *{{.DomainEntity}}Repository) Update({{.DomainEntityLowerCamel}} *dom
 }
 
 //GetAll {{.DomainEntity}}
-func (repo *{{.DomainEntity}}Repository) GetAll(last{{.DomainEntity}}ID string, pageSize int64) ([]*domain.{{.DomainEntity}}, error) {
+func (repo *{{.DomainEntity}}Repository) GetAll(offset int64, pageSize int64, sortFields map[string]int64) ([]*domain.{{.DomainEntity}}, error) {
 	{{.DomainEntityLowerCamel}}List := make([]*domain.{{.DomainEntity}}, 0)
 	collection := repo.Conn.Database(DatabaseName).Collection({{.DomainEntityLowerCamel}}CollectionName)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	var dbfilter interface{}
-	if strings.TrimSpace(last{{.DomainEntity}}ID) == "" {
-		dbfilter = bson.D{}
-	} else {
-		last{{.DomainEntity}}, err := primitive.ObjectIDFromHex(last{{.DomainEntity}}ID)
-		if err != nil {
-			return nil, domain.ConstraintViolation(fmt.Sprintf("Invalid {{.DomainEntityLowerCamel}} Id: %s. Message: %s", last{{.DomainEntity}}ID, err.Error()))
-		}
-		dbfilter = bson.M{"_id": bson.M{"$gt": last{{.DomainEntity}}}}
-	}
+	dbfilter := bson.D{}
 	opts := &options.FindOptions{}
-	opts.SetSort(bson.M{"_id": 1})
+	var sortFieldsBson bson.D
+	if len(sortFields) == 0 {
+		sortFieldsBson = bson.D{bson.E{Key: "_id", Value: 1}}
+	} else {
+		sortFieldsBson = bson.D{}
+		for sortedFieldKey, sortedFieldValue := range sortFields {
+			sortFieldsBson = append(sortFieldsBson, bson.E{Key: sortedFieldKey, Value: sortedFieldValue})
+		}
+	}
+	opts.SetSort(sortFieldsBson)
+	opts.SetSkip(offset)
 	opts.SetLimit(pageSize)
 	cur, err := collection.Find(ctx, dbfilter, opts)
 	defer func() { _ = cur.Close(ctx) }()

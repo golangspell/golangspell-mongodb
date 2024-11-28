@@ -39,7 +39,19 @@ func Create{{.DomainEntity}}(c echo.Context) error {
 func Get{{.DomainEntity}}List(c echo.Context) error {
 	logger := config.GetLogger
 	defer logger().Sync()
-	var last{{.DomainEntity}}ID = c.QueryParam("last{{.DomainEntity}}Id")
+	var offsetString = c.QueryParam("offset")
+	var offset int
+	if offsetString == "" {
+		offset = 0
+	} else {
+		var err error
+		offset, err = strconv.Atoi(offsetString)
+		if err != nil {
+			msg := fmt.Sprintf("Invalid format for offset: %s. Message: %s", offsetString, err.Error())
+			logger().Error(msg)
+			return c.JSON(http.StatusBadRequest, domain.ConstraintViolation(msg))
+		}
+	}
 	var pageSizeString = c.QueryParam("pageSize")
 
 	var pageSize int
@@ -55,7 +67,7 @@ func Get{{.DomainEntity}}List(c echo.Context) error {
 		}
 	}
 
-	{{.DomainEntityLowerCamel}}List, err := domain.Get{{.DomainEntity}}GetAllUsecase().Execute(last{{.DomainEntity}}ID, int64(pageSize))
+	{{.DomainEntityLowerCamel}}List, err := domain.Get{{.DomainEntity}}GetAllUsecase().Execute(int64(offset), int64(pageSize), map[string]int64{"_id": 1})
 	if err != nil {
 		logger().Errorf("An error occurred while trying to Get the {{.DomainEntity}} List: %s", err.Error())
 		return c.JSON(err.(domain.IdentifiableError).GetCode(), err)

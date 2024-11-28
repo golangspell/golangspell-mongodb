@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2024-11-28
+
+### Changed
+- Changed the pagination from infinite scroll based in ID to offset based approach to be more flexible for multiple sorting possibilities
+- Updated the Go version
+
 ## [0.1.23] - 2024-06-07
 
 ### Added

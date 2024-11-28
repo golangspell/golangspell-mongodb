@@ -13,11 +13,11 @@ type {{.DomainEntity}}GetAll struct {
 }
 
 //Execute with paging
-func (u *{{.DomainEntity}}GetAll) Execute(last{{.DomainEntity}}ID string, pageSize int64) ([]*domain.{{.DomainEntity}}, error) {
+func (u *{{.DomainEntity}}GetAll) Execute(offset int64, pageSize int64, sortFields map[string]int64) ([]*domain.{{.DomainEntity}}, error) {
 	logger := config.GetLogger
 	defer logger().Sync()
 
-	{{.DomainEntityLowerCamel}}List, err := u.{{.DomainEntityLowerCamel}}Repository.GetAll(last{{.DomainEntity}}ID, pageSize)
+	{{.DomainEntityLowerCamel}}List, err := u.{{.DomainEntityLowerCamel}}Repository.GetAll(offset, pageSize, sortFields)
 	if err != nil {
 		msg := fmt.Sprintf("Could not get the {{.DomainEntity}} list. Message: %s\n", err.Error())
 		logger().Error(msg)
